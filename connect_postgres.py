@@ -40,6 +40,7 @@ def connect_cockroachdb(dbname=DEFAULT_DBNAME):
 
         # Return the connection
         return conn
+    
     except Exception as e:
         print("Error: Unable to connect to CockroachDB")
         print(e)
