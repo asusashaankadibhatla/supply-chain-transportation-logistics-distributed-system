@@ -1,27 +1,46 @@
 import psycopg2
 from config import params
-DEFAULT_DBNAME = 'postgres'
+DEFAULT_DBNAME = 'defaultdb'
 
-def connect_postgres(dbname = DEFAULT_DBNAME):
+def connect_cockroachdb(dbname=DEFAULT_DBNAME):
     try:
-        # PostgreSQL connection details
+        # CockroachDB connection details
         user = params['user']
         password = params['password']
         host = params['host']
         port = params['port']
+        sslmode = params.get('sslmode', 'require')  # Default SSL mode
 
         # Construct the connection string
-        conn_string = f"dbname='{dbname}' user='{user}' host='{host}' password='{password}' port='{port}'"
+        conn_string_parts = [
+            f"dbname='{dbname}'",
+            f"user='{user}'",
+            f"host='{host}'",
+            f"password='{password}'",
+            f"port='{port}'",
+            f"sslmode='{sslmode}'"
+        ]
 
-        # Connect to the PostgreSQL database
+        # Additional SSL parameters, if provided
+        if 'sslrootcert' in params:
+            conn_string_parts.append(f"sslrootcert='{params['sslrootcert']}'")
+        if 'sslcert' in params:
+            conn_string_parts.append(f"sslcert='{params['sslcert']}'")
+        if 'sslkey' in params:
+            conn_string_parts.append(f"sslkey='{params['sslkey']}'")
+
+        # Finalize the connection string
+        conn_string = " ".join(conn_string_parts)
+
+        # Connect to the CockroachDB cluster
         conn = psycopg2.connect(conn_string)
 
         # Print a success message
-        print("Successfully connected to PostgreSQL! with ",dbname)
+        print("Successfully connected to CockroachDB with database:", dbname)
 
         # Return the connection
         return conn
     except Exception as e:
-        print("Error: Unable to connect to PostgreSQL")
+        print("Error: Unable to connect to CockroachDB")
         print(e)
         return None
